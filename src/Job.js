@@ -140,6 +140,8 @@ Job.prototype.complete = function () {
   var deferred = Q.defer();
 
   function fetch() {
+
+    console.log('polling status of task:' + me.taskId);
     utils
       .makeRequest({
         method: 'POST',
