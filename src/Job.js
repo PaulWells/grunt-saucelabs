@@ -141,7 +141,6 @@ Job.prototype.complete = function () {
 
   function fetch() {
 
-    console.log('polling status of task:' + me.taskId);
     utils
       .makeRequest({
         method: 'POST',
@@ -152,6 +151,11 @@ Job.prototype.complete = function () {
       .then(function (body) {
         var result = body['js tests'] && body['js tests'][0];
         var jobId = result.job_id;
+
+        if(result.status && result.status === 'test error') {
+          deferred.reject('Test error for task:' + me.taskId);
+          return;
+        }
 
         if (!body.completed || !reJobId.test(jobId)) {
           return Q
