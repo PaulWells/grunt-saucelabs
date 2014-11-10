@@ -153,7 +153,8 @@ Job.prototype.complete = function () {
         var jobId = result.job_id;
 
         if(result.status && result.status === 'test error') {
-          deferred.reject('Test error for task:' + me.taskId);
+          result.taskId = me.taskId;
+          deferred.resolve(result);
           return;
         }
 
