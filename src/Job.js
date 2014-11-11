@@ -111,9 +111,7 @@ Job.prototype.getResult = function () {
     .then(function (result) {
       result.testPageUrl = me.url;
       if (result.status === 'test error') {
-        // A detailed error message should be composed here after the Sauce Labs API is
-        // modified to report errors better, see #102.
-        throw 'Test Error';
+        result.passed = false;
       }
 
       return result;
