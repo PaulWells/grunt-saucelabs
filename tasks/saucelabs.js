@@ -3,7 +3,9 @@
 module.exports = function (grunt) {
   var Q = require('q');
   var SauceTunnel = require('sauce-tunnel');
-  var TestRunner = require('../src/TestRunner');
+  var TestRunner = require('../src/TestRunner')(grunt);
+
+  Q.longStackSupport = true;
 
   function reportProgress(notification) {
     switch (notification.type) {
@@ -113,7 +115,7 @@ module.exports = function (grunt) {
 
         if (tunnel) {
           deferred = Q.defer();
-          
+
           reportProgress({
             type: 'tunnelClose'
           });
@@ -130,7 +132,7 @@ module.exports = function (grunt) {
           callback(passed);
         },
         function (error) {
-          grunt.log.error(error.toString());
+          grunt.log.error(error.stack || error.toString());
           callback(false);
         }
       )

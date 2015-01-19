@@ -1,9 +1,12 @@
 'use strict';
 
+module.exports = function (grunt) {
 var Q = require('q');
 var _ = require('lodash');
-var utils = require('./utils');
+  var utils = require('./utils')(grunt);
 var reJobId = /^[a-z0-9]{32}$/;
+
+  Q.longStackSupport = true;
 
 //these result parsers return true if the tests all passed
 var resultParsers = {
@@ -28,35 +31,25 @@ var resultParsers = {
  * Represents a Sauce Labs job.
  *
  * @constructor
- * @param {String} user - The Sauce Labs username.
- * @param {String} key - The Sauce Labs access key.
- * @param {String} framework - The unit test framework's name. Can be 'jasmine',
- *   'qunit', 'YUI Test', 'mocha' or 'custom'.
- * @param {Number} pollInterval - The polling interval in milliseconds.
+   * @param {Object} runner - TestRunner instance.
  * @param {String} url - The test runner page's URL.
  * @param {Object} browser - Object describing the platform to run the test on.
- * @param {String} build - Build ID.
- * @param {String} testName -  The name of this test, displayed on the Sauce Labs
- *   dashboard.
- * @param {Object} sauceConfig - Map of extra parameters to be passed to Sauce Labs.
- * @param {Boolean} tunneled - Does the test runs on a tunnel?
- * @param {String} tunnelId - Tunnel ID.
  */
-var Job = function (user, key, framework, pollInterval, url, browser, build, testName,
-  sauceConfig, tunneled, tunnelId) {
+  var Job = function (runner, url, browser) {
   this.id = null;
   this.taskId = null;
-  this.user = user;
-  this.key = key;
-  this.framework = framework;
-  this.pollInterval = pollInterval;
+    this.user = runner.user;
+    this.key = runner.key;
+    this.framework = runner.framework;
+    this.pollInterval = runner.pollInterval;
   this.url = url;
   this.platform = _.isArray(browser) ? browser : [browser.platform || '', browser.browserName || '', browser.version || ''];
-  this.build = build;
-  this.testName = testName;
-  this.sauceConfig = sauceConfig;
-  this.tunneled = tunneled;
-  this.tunnelId = tunnelId;
+    this.build = runner.build;
+    this.tags = browser.tags || runner.tags;
+    this.testName = browser.name || runner.testName;
+    this.sauceConfig = runner.sauceConfig;
+    this.tunneled = runner.tunneled;
+    this.tunnelId = runner.tunnelId;
 };
 
 /**
@@ -76,6 +69,7 @@ Job.prototype.start = function () {
       url: this.url,
       framework: this.framework,
       build: this.build,
+        tags: this.tags,
       name: this.testName
     }
   };
@@ -91,11 +85,12 @@ Job.prototype.start = function () {
       var taskIds = body['js tests'];
 
       if (!taskIds || !taskIds.length) {
-        throw 'Error starting tests through Sauce API: ' + JSON.stringify(body);
+          throw new Error('Error starting tests through Sauce API.');
       }
 
       me.taskId = taskIds[0];
-    });
+      }
+    );
 };
 
 /**
@@ -135,11 +130,9 @@ Job.prototype.getResult = function () {
  */
 Job.prototype.complete = function () {
   var me = this;
-  var deferred = Q.defer();
 
   function fetch() {
-
-    utils
+      return utils
       .makeRequest({
         method: 'POST',
         url: ['https://saucelabs.com/rest/v1', me.user, 'js-tests/status'].join('/'),
@@ -164,17 +157,11 @@ Job.prototype.complete = function () {
 
         me.id = jobId;
 
-        deferred.resolve(result);
-      })
-      .fail(function (error) {
-        deferred.reject(error);
-      })
-      .done();
+          return result;
+        });
   }
 
-  fetch();
-
-  return deferred.promise;
+    return fetch();
 };
 
 /**
@@ -186,7 +173,7 @@ Job.prototype.complete = function () {
 Job.prototype.stop = function () {
   return utils.makeRequest({
     method: 'PUT',
-    url: ['https://saucelabs.com/rest/v1', this.user, 'jobs', this.id, 'stop' ].join('/'),
+      url: ['https://saucelabs.com/rest/v1', this.user, 'jobs', this.id, 'stop'].join('/'),
     auth: { user: this.user, pass: this.key }
   });
 };
@@ -205,4 +192,5 @@ Job.prototype.del = function () {
   });
 };
 
-module.exports = Job;
+  return Job;
+};

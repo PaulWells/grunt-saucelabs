@@ -13,7 +13,7 @@ A Grunt task for running QUnit, Jasmine, Mocha, YUI tests, or any framework usin
 [Grunt](http://gruntjs.com/) is a task-based command line build tool for JavaScript projects, based on nodejs.
 [QUnit](http://qunitjs.com/) is a powerful, easy-to-use JavaScript unit test suite used by the jQuery, jQuery UI and jQuery Mobile projects and is capable of testing any generic JavaScript code, including itself!
 [Jasmine](http://jasmine.github.io/) is a behavior-driven development framework for testing JavaScript code.
-[Mocha](http://visionmedia.github.io/mocha/) is a JavaScript test framework for running serial asynchronous tests.
+[Mocha](https://github.com/mochajs/mocha) is a JavaScript test framework for running serial asynchronous tests.
 [YUI Test](http://developer.yahoo.com/yui/yuitest/) is a browser-based testing framework from Yahoo!.
 [Sauce Labs](https://saucelabs.com/) offers browser environments on the cloud for testing code.
 
@@ -73,10 +73,11 @@ Full list of parameters which can be added to a saucelabs-* task:
 * __urls__: An array or URLs that will be loaded in the browsers, one after another. Since SauceConnect is used, these URLs can also be localhost URLs that are available using the `server` task from grunt. _Required_
 * __build__: The build number for this test. _Optional_
 * __testname__: The name of this test, displayed on the Sauce Labs dashboard. _Optional_
+* __tags__: An array of strings, to be added as tags to the test on Sauce Labs. _Optional_
 * __tunneled__: Defaults to true; Won't launch a Sauce Connect tunnel if set to false. _Optional_
 * __tunnelArgs__: Array of optional arguments to be passed to the Sauce Connect tunnel. example: `['--debug', '--direct-domains', 'google.com']`. See [here](https://saucelabs.com/docs/connect) for further documentation.
 * __sauceConfig__: Map of extra parameters to be passed to sauce labs. example: `{'video-upload-on-pass': false, 'idle-timeout': 60}`. See [here](https://saucelabs.com/docs/additional-config) for further documentation.
-* __pollInterval__ : Number of milliseconds between each retry to see if a test is completed or not (default: 2000). _Optional_
+* __pollInterval__: Number of milliseconds between each retry to see if a test is completed or not (default: 2000). _Optional_
 * __throttled__: Maximum number of unit test pages which will be sent to Sauce Labs concurrently.  Exceeding your Sauce Labs' allowed concurrency can lead to test failures if you have a lot of unit test pages. _Optional_
 * __max-duration__: Maximum duration of a test, this is actually a Selenium Capability. Sauce Labs defaults to 180 seconds for js unit tests. _Optional_
 * __browsers__: An array of objects representing the [various browsers](https://saucelabs.com/docs/platforms) on which this test should run. _Optional_
@@ -260,6 +261,18 @@ The [IndexedDBShim](http://github.com/axemclion/IndexedDBShim) is a project that
 
 Changelog
 ---------
+####8.4.1####
+* updated sauce-tunnel to v2.1.1 (and therefore Sauce Connect to v4.3.5)
+
+####8.4.0####
+* polling a job for its status now retries
+* add `maxPollRetries` parameter, which specifies the number of status-requests to make before giving up on a job
+
+####8.3.3####
+* improvements to README
+* add a 'tags' parameter to the config, to allow setting tags on tests
+* optionally, you can set "name" and "tags" onto the "browser" object and they'll be applied to the corresponding job
+
 ####8.3.2####
 * fixed a bug where DELETE commands which errored on the Sauce side caused test execution to halt
 
