@@ -145,8 +145,7 @@ Job.prototype.complete = function () {
 
         if(result.status && result.status === 'test error') {
           result.result = "Failed to start jobs for task: " + me.taskId;
-          deferred.resolve(result);
-          return;
+          return result;
         }
 
         if (!body.completed || !reJobId.test(jobId)) {
