@@ -112,10 +112,48 @@ module.exports = function (grunt) {
         .then(function () { return job.getResult(); })
         .then(function (result) {
           // when a test times out then the result property is a string
-          if (result.result &&
-            result.result.indexOf &&
-            result.result.indexOf('Test exceeded maximum duration') > -1 &&
-            retry < me.maxRetries) {
+          
+          function resultIsFailure(result) {
+            
+            if (!result) {
+              return false;
+            }
+
+            // Retry if a result came back as null (Saucelabs failure)
+            if (result.result === null) {
+              return true;
+            }
+            
+            if (!result.result) {
+              return false;
+            }
+            
+            // Retry if a unit test failed
+            if (result.result.failed > 0) {
+              console.log("Retrying due to failed unit test");
+              return true;
+            }
+            
+            if (!result.result.indexOf) {
+              return false;
+            }
+            
+            var failMessages = [
+              'Test exceeded maximum duration',
+              'The Sauce VMs failed to start the browser or device',
+              'Selenium didn\'t complete your last command on time'
+            ];
+            
+            // Retry if one of the error messages was returned
+            for (var i = 0; i < failMessages.length; i++) {
+                if (result.result.indexOf(failMessages[i]) > -1){
+                  return true;
+                } 
+            }
+            return false;
+          }
+          
+          if (resultIsFailure(result) && retry < me.maxRetries) {
             retry += 1;
 
             me.reportProgress({
