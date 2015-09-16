@@ -141,7 +141,8 @@ module.exports = function (grunt) {
             var failMessages = [
               'Test exceeded maximum duration',
               'The Sauce VMs failed to start the browser or device',
-              'Selenium didn\'t complete your last command on time'
+              'Selenium didn\'t complete your last command on time',
+              'Failed to start jobs'
             ];
             
             // Retry if one of the error messages was returned
